@@ -9,7 +9,6 @@ const Converter = ({ category }) => {
   useEffect(() => {
     const fetchUnits = async () => {
       try {
-        // Usa la URL completa del backend
         const response = await fetch(`https://convertidor-backend.vercel.app/api/units/${category}/es`);
         const data = await response.json();
         setUnits(data);
@@ -41,7 +40,6 @@ const Converter = ({ category }) => {
     for (const toUnit of units) {
       if (fromUnit !== toUnit.key) {
         try {
-          // Usa la URL completa del backend
           const response = await fetch('https://convertidor-backend.vercel.app/api/convert', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -49,7 +47,9 @@ const Converter = ({ category }) => {
           });
           const data = await response.json();
           if (response.ok) {
-            newConversions[toUnit.key] = data.result.toFixed(4);
+            // Aquí está el cambio: usamos parseFloat() para eliminar los ceros finales.
+            const roundedResult = parseFloat(data.result.toFixed(4));
+            newConversions[toUnit.key] = roundedResult;
           }
         } catch (error) {
           console.error('Error al convertir:', error);
