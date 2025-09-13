@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const Converter = ({ category }) => {
   const [inputValue, setInputValue] = useState('');
+  const [debouncedValue, setDebouncedValue] = useState('');
   const [units, setUnits] = useState([]);
   const [fromUnit, setFromUnit] = useState('');
   const [conversions, setConversions] = useState({});
@@ -22,12 +23,25 @@ const Converter = ({ category }) => {
     fetchUnits();
   }, [category]);
 
+  
   useEffect(() => {
-    setConversions({});
-    if (inputValue && fromUnit) {
-      performConversions(inputValue);
+    const timer = setTimeout(() => {
+      setDebouncedValue(inputValue);
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [inputValue]); 
+
+
+  useEffect(() => {
+    if (debouncedValue && fromUnit) {
+      performConversions(debouncedValue);
+    } else if (debouncedValue === '') {
+      setConversions({});
     }
-  }, [inputValue, fromUnit]);
+  }, [debouncedValue, fromUnit]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -47,7 +61,6 @@ const Converter = ({ category }) => {
           });
           const data = await response.json();
           if (response.ok) {
-            // Aquí está el cambio: usamos parseFloat() para eliminar los ceros finales.
             const roundedResult = parseFloat(data.result.toFixed(4));
             newConversions[toUnit.key] = roundedResult;
           }
