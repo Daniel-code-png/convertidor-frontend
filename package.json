@@ -20,7 +20,7 @@
   },
   "eslintConfig": {
     "extends": [
-      "mi-convertidor-app",
+      "react-app",
       "react-app/jest"
     ]
   },
