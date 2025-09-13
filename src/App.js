@@ -9,7 +9,6 @@ const categories = {
   money: ['USD', 'COP', 'CHF'],
 };
 
-// Objeto para mapear las claves en inglés a nombres de visualización en español
 const displayNames = {
   time: 'Tiempo',
   weight: 'Peso',

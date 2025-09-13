@@ -1,64 +1,55 @@
 import React, { useState, useEffect } from 'react';
 
-
-const displayUnits = {
-  
-  hours: 'horas',
-  days: 'días',
-  months: 'meses',
-  years: 'años',
-  
-  grams: 'gramos',
-  kilograms: 'kilogramos',
-  pounds: 'libras',
-  
-  celsius: 'celsius',
-  fahrenheit: 'fahrenheit',
-  kelvin: 'kelvin',
-  
-  USD: 'dólar estadounidense',
-  COP: 'peso colombiano',
-  CHF: 'franco suizo',
-};
-
-const Converter = ({ category, units }) => {
+const Converter = ({ category }) => {
   const [inputValue, setInputValue] = useState('');
-  const [fromUnit, setFromUnit] = useState(units[0]);
+  const [units, setUnits] = useState([]);
+  const [fromUnit, setFromUnit] = useState('');
   const [conversions, setConversions] = useState({});
 
   useEffect(() => {
-    
+    const fetchUnits = async () => {
+      try {
+        // Usa la URL completa del backend
+        const response = await fetch(`https://convertidor-backend.vercel.app/api/units/${category}/es`);
+        const data = await response.json();
+        setUnits(data);
+        if (data.length > 0) {
+          setFromUnit(data[0].key);
+        }
+      } catch (error) {
+        console.error('Error al obtener las unidades:', error);
+      }
+    };
+    fetchUnits();
+  }, [category]);
+
+  useEffect(() => {
     setConversions({});
-    if (inputValue !== '') {
+    if (inputValue && fromUnit) {
       performConversions(inputValue);
     }
-  }, [category, fromUnit]);
+  }, [inputValue, fromUnit]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInputValue(value);
-
-    if (value && !isNaN(value)) {
-      performConversions(value);
-    } else {
-      setConversions({}); 
-    }
   };
 
   const performConversions = async (value) => {
     const newConversions = {};
 
     for (const toUnit of units) {
-      if (fromUnit !== toUnit) {
+      if (fromUnit !== toUnit.key) {
         try {
-          const response = await fetch('http://localhost:5000/api/convert', {
+          // Usa la URL completa del backend
+          const response = await fetch('https://convertidor-backend.vercel.app/api/convert', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ category, value: parseFloat(value), fromUnit, toUnit }),
+            body: JSON.stringify({ category, value: parseFloat(value), fromUnit, toUnit: toUnit.key }),
           });
           const data = await response.json();
           if (response.ok) {
-            newConversions[toUnit] = data.result.toFixed(4); 
+            newConversions[toUnit.key] = data.result.toFixed(4);
           }
         } catch (error) {
           console.error('Error al convertir:', error);
@@ -83,8 +74,8 @@ const Converter = ({ category, units }) => {
           onChange={(e) => setFromUnit(e.target.value)}
         >
           {units.map((unit) => (
-            <option key={unit} value={unit}>
-              {displayUnits[unit]}
+            <option key={unit.key} value={unit.key}>
+              {unit.name}
             </option>
           ))}
         </select>
@@ -92,11 +83,11 @@ const Converter = ({ category, units }) => {
 
       <div className="results">
         {units.map((unit) => {
-          if (unit === fromUnit) return null;
+          if (unit.key === fromUnit) return null;
           return (
-            <div key={unit} className="result-item">
-              <strong>{displayUnits[unit]}:</strong>
-              <span>{conversions[unit] || '...'}</span>
+            <div key={unit.key} className="result-item">
+              <strong>{unit.name}:</strong>
+              <span>{conversions[unit.key] || '...'}</span>
             </div>
           );
         })}
