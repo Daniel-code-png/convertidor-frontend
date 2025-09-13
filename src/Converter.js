@@ -1,5 +1,28 @@
 import React, { useState, useEffect } from 'react';
 
+const displayUnits = {
+  hours: 'horas',
+  days: 'días',
+  months: 'meses',
+  years: 'años',
+  grams: 'gramos',
+  kilograms: 'kilogramos',
+  pounds: 'libras',
+  celsius: 'celsius',
+  fahrenheit: 'fahrenheit',
+  kelvin: 'kelvin',
+  USD: 'dólar estadounidense',
+  COP: 'peso colombiano',
+  CHF: 'franco suizo',
+};
+
+const displayNames = {
+  time: 'Tiempo',
+  weight: 'Peso',
+  temperature: 'Temperatura',
+  money: 'Dinero',
+};
+
 const Converter = ({ category }) => {
   const [inputValue, setInputValue] = useState('');
   const [debouncedValue, setDebouncedValue] = useState('');
@@ -23,7 +46,6 @@ const Converter = ({ category }) => {
     fetchUnits();
   }, [category]);
 
-  
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedValue(inputValue);
@@ -32,8 +54,7 @@ const Converter = ({ category }) => {
     return () => {
       clearTimeout(timer);
     };
-  }, [inputValue]); 
-
+  }, [inputValue]);
 
   useEffect(() => {
     if (debouncedValue && fromUnit) {
@@ -74,7 +95,7 @@ const Converter = ({ category }) => {
 
   return (
     <div className="converter-card">
-      <h3>{`Convertidor de ${category.charAt(0).toUpperCase() + category.slice(1)}`}</h3>
+      <h3>{`Convertidor de ${displayNames[category]}`}</h3>
       <div className="input-group">
         <input
           type="number"
